@@ -231,8 +231,18 @@ public class IntSet implements Iterable<Integer> {
 	 * @return die Differenzmenge
 	 */
 	public static IntSet difference(IntSet s1, IntSet s2) {
-		// TODO: alle Elemente identifizieren, die in s1 aber nicht in s2 sind
-		return null;
+		IntSet s3 = new IntSet(s1.capacity());
+
+		for (int i = 0; i < s3.data.length; i++) {
+			if (i < s2.data.length) {
+				s3.data[i] = s1.data[i] & ~s2.data[i];
+			} else {
+				s3.data[i] = s1.data[i];
+			}
+		}
+
+
+		return s3;
 	}
 
 	/**
@@ -304,16 +314,23 @@ public class IntSet implements Iterable<Integer> {
 	/**
 	 * IntSet Mengen-Iterator
 	 */
+	/**
+	 * IntSet Mengen-Iterator
+	 */
 	public class Iterator implements java.util.Iterator<Integer> {
-		// TODO: Instanzvariablen deklarieren
+		private final IntSet s;
+		private final int cap;
+		private int index;
 
 		/**
-		 * Erzeugt einen Iterator ueber <code>s</code>.
+		 * Erzeugt einen Iterator über <code>s</code>.
 		 *
-		 * @param s die Menge, ueber die iteriert werden soll
+		 * @param s die Menge, über die iteriert werden soll
 		 */
 		public Iterator(IntSet s) {
-			// TODO: Initialisierung der Instanzvariablen
+			this.s = s;
+			this.cap = s.capacity();
+			this.index = 0;
 		}
 
 		/**
@@ -321,19 +338,28 @@ public class IntSet implements Iterable<Integer> {
 		 */
 		@Override
 		public boolean hasNext() {
-			// TODO: ermitteln, ob weitere Elemente im IntSet sind
+			while (index < cap) {
+				int stelle = index / 32;
+				int bitPosition = index % 32;
+				if ((s.data[stelle] & (1 << bitPosition)) != 0) {
+					return true;
+				}
+				index++;
+			}
 			return false;
 		}
 
 		/**
-		 * Gibt das naechste Element zurueck und setzt den Iterator weiter.
+		 * Gibt das nächste Element zurück und setzt den Iterator weiter.
 		 *
-		 * @return das naechste Element
+		 * @return das nächste Element
 		 */
 		@Override
 		public Integer next() {
-			// TODO: naechstes (enthaltenes) Element zurueckgeben
-			return -1;
+			if (!hasNext()) {
+				throw new java.util.NoSuchElementException("Keine Elemente mehr in s");
+			}
+			return index++;
 		}
 	}
 }
